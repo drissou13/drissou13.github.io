@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drissou13 - Tous mes projets</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #111;
+      color: #f0f0f0;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.2rem;
+    }
+
+    #projects {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    .repo {
+      background: #222;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .repo h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.2rem;
+      color: #76c7ff;
+    }
+
+    .repo p {
+      font-size: 0.95rem;
+      color: #ccc;
+      margin-bottom: 0.5rem;
+    }
+
+    iframe {
+      width: 100%;
+      height: 300px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+      background: #000;
+    }
+
+    .note {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 0.5rem;
+    }
+
+    .repo a {
+      color: #76c7ff;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: auto;
+    }
+
+    .easter-egg {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>👨‍💻 Drissou13 - Portfolio</h1>
+    <p>Tous mes projets GitHub avec exécution directe</p>
+  </header>
+
+  <section id="projects">Chargement des projets...</section>
+
+  <div class="easter-egg" id="easter"></div>
+
+  <script>
+    async function checkDemo(url) {
+      try {
+        const res = await fetch(url, { method: 'HEAD' });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    async function loadRepos() {
+      const response = await fetch("https://api.github.com/users/drissou13/repos");
+      const repos = await response.json();
+      const container = document.getElementById("projects");
+      container.innerHTML = "";
+
+      for (let repo of repos) {
+        const div = document.createElement("div");
+        div.className = "repo";
+
+        const demoUrl = `https://drissou13.github.io/${repo.name}`;
+        const hasDemo = await checkDemo(demoUrl);
+
+        div.innerHTML = `
+          <h3>${repo.name}</h3>
+          <p>${repo.description || "Aucune description disponible."}</p>
+          ${
+            hasDemo
+              ? `<iframe src="${demoUrl}" loading="lazy"></iframe>
+                 <p class="note">💡 Démo disponible (GitHub Pages)</p>`
+              : `<a href="${repo.html_url}" target="_blank">Voir sur GitHub</a>
+                 <p class="note">🚫 Aucune démo trouvée</p>`
+          }
+        `;
+
+        container.appendChild(div);
+      }
+    }
+
+    // 🎉 Easter eggs dynamiques
+    function setEasterEgg() {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const egg = document.getElementById("easter");
+
+      if (month === 12) {
+        egg.textContent = "❄️";
+        document.body.style.background = "#111 url('https://i.imgur.com/JFY50Qo.gif') repeat";
+      } else if (month === 10) {
+        egg.textContent = "🎃";
+      } else if (month >= 3 && month <= 5) {
+        egg.textContent = "🌸";
+      } else if (month === 7 || month === 8) {
+        egg.textContent = "🌞";
+      } else {
+        egg.textContent = "";
+      }
+    }
+
+    setEasterEgg();
+    loadRepos();
+  </script>
+</body>
+</html>
