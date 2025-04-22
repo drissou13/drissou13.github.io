@@ -1,95 +1,241 @@
-let previousReposIds = [];
-let currentPage = 1;
-const projectsPerPage = 5;
-let allRepos = [];
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio Drissou13 - Mes Projets</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 2rem;
+    }
 
-async function checkDemo(url) {
-  try {
-    const res = await fetch(url, { method: 'HEAD' });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: #161b22;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-// Charger les projets GitHub et afficher la première page
-async function loadRepos() {
-  const res = await fetch("https://api.github.com/users/drissou13/repos");
-  const repos = await res.json();
-  allRepos = repos;
-  displayPage(currentPage);
-}
+    h1 {
+      font-size: 2.5rem;
+      color: #58a6ff;
+    }
 
-async function displayPage(pageNumber) {
-  const container = document.getElementById("content-container");
-  const nav = document.getElementById("page-nav");
+    nav {
+      display: flex;
+      gap: 2rem;
+    }
 
-  const start = (pageNumber - 1) * projectsPerPage;
-  const end = start + projectsPerPage;
-  const pageRepos = allRepos.slice(start, end);
+    nav a {
+      color: #c9d1d9;
+      text-decoration: none;
+      font-size: 1.1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
 
-  container.innerHTML = ""; // Clear current page content
+    nav a:hover {
+      background: #238636;
+    }
 
-  pageRepos.forEach((repo) => {
-    const demoUrl = `https://drissou13.github.io/${repo.name}`;
-    const hasDemo = await checkDemo(demoUrl);
+    .page-content {
+      margin-top: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease-in-out;
+    }
 
-    const div = document.createElement("div");
-    div.className = "repo";
+    .page-active {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
-    const newBadge = !previousReposIds.includes(repo.id) ? `<span class="badge-new">Nouveau</span>` : "";
+    .repo {
+      background: #161b22;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s;
+    }
 
-    div.innerHTML = `
-      <h3>${repo.name} ${newBadge}</h3>
-      <p>${repo.description || "Aucune description disponible."}</p>
-      ${hasDemo ? `
-        <iframe src="${demoUrl}"></iframe>
-        <button onclick="window.open('${demoUrl}', '_blank')">Ouvrir dans une nouvelle fenêtre 🚀</button>
-        <p class="note">Démo GitHub Pages active</p>
-      ` : `
-        <a href="${repo.html_url}" target="_blank">Voir le code 📂</a>
-        <p class="note">Pas de démo détectée</p>
-      `}
-    `;
+    .repo:hover {
+      transform: scale(1.02);
+    }
 
-    container.appendChild(div);
-    previousReposIds.push(repo.id);
-  });
+    .repo h3 {
+      margin-top: 0;
+      color: #79c0ff;
+      display: flex;
+      align-items: center;
+    }
 
-  updatePagination();
-  animatePageTransition();
-}
+    .badge-new {
+      background-color: #f34f5c;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      margin-left: 10px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
 
-function updatePagination() {
-  const nav = document.getElementById("page-nav");
-  nav.innerHTML = "";
-  const totalPages = Math.ceil(allRepos.length / projectsPerPage);
+    .repo p {
+      font-size: 0.95rem;
+      margin: 0.5rem 0;
+    }
 
-  for (let i = 1; i <= totalPages; i++) {
-    const pageLink = document.createElement("a");
-    pageLink.href = "javascript:void(0)";
-    pageLink.textContent = `Page ${i}`;
-    pageLink.onclick = () => {
-      currentPage = i;
-      displayPage(i);
-    };
-    nav.appendChild(pageLink);
-  }
-}
+    .repo a,
+    .repo button {
+      text-decoration: none;
+      background: #238636;
+      color: #fff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      transition: background 0.3s;
+      border: none;
+      cursor: pointer;
+    }
 
-// Fonction pour ajouter une transition d'animation de changement de page
-function animatePageTransition() {
-  const currentPageContent = document.querySelector(".page-active");
-  if (currentPageContent) {
-    currentPageContent.classList.remove("page-active");
-    currentPageContent.classList.add("page-hidden");
-  }
-  const newPageContent = document.querySelector(".page-active");
-  if (newPageContent) {
-    newPageContent.classList.remove("page-hidden");
-    newPageContent.classList.add("page-active");
-  }
-}
+    .repo a:hover,
+    .repo button:hover {
+      background: #2ea043;
+    }
 
-// Charger les projets dès que la page est prête
-loadRepos();
+    iframe {
+      width: 100%;
+      height: 200px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: #8b949e;
+      margin-top: 0.4rem;
+    }
+
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #8b949e;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>👨‍💻 Drissou13 - Portfolio</h1>
+    <nav id="page-nav"></nav>
+  </header>
+
+  <div id="content-container"></div>
+
+  <div class="footer">
+    <p>&copy; 2025 Drissou13</p>
+  </div>
+
+  <script>
+    let previousReposIds = [];
+    let currentPage = 1; // Début sur la première page
+    const projectsPerPage = 5; // Nombre de projets par page
+    let allRepos = [];
+
+    // Fonction pour vérifier si une démo GitHub Pages existe
+    async function checkDemo(url) {
+      try {
+        const res = await fetch(url, { method: 'HEAD' });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    // Fonction pour charger les repos GitHub
+    async function loadRepos() {
+      const res = await fetch("https://api.github.com/users/drissou13/repos");
+      const repos = await res.json();
+      allRepos = repos;
+      displayPage(currentPage); // Affiche la première page dès que les données sont chargées
+    }
+
+    // Fonction pour afficher une page spécifique de projets
+    async function displayPage(pageNumber) {
+      const container = document.getElementById("content-container");
+      const nav = document.getElementById("page-nav");
+
+      const start = (pageNumber - 1) * projectsPerPage;
+      const end = start + projectsPerPage;
+      const pageRepos = allRepos.slice(start, end);
+
+      container.innerHTML = ""; // Clear current page content
+      pageRepos.forEach((repo) => {
+        const demoUrl = `https://drissou13.github.io/${repo.name}`;
+        const hasDemo = await checkDemo(demoUrl);
+
+        const div = document.createElement("div");
+        div.className = "repo";
+
+        // Affiche le badge "Nouveau" pour les projets non affichés précédemment
+        const newBadge = !previousReposIds.includes(repo.id) ? `<span class="badge-new">Nouveau</span>` : "";
+
+        div.innerHTML = `
+          <h3>${repo.name} ${newBadge}</h3>
+          <p>${repo.description || "Aucune description disponible."}</p>
+          ${hasDemo ? `
+            <iframe src="${demoUrl}"></iframe>
+            <button onclick="window.open('${demoUrl}', '_blank')">Ouvrir dans une nouvelle fenêtre 🚀</button>
+            <p class="note">Démo GitHub Pages active</p>
+          ` : `
+            <a href="${repo.html_url}" target="_blank">Voir le code 📂</a>
+            <p class="note">Pas de démo détectée</p>
+          `}
+        `;
+        
+        container.appendChild(div);
+        previousReposIds.push(repo.id);
+      });
+
+      updatePagination(); // Mise à jour de la pagination
+
+    }
+
+    // Fonction pour mettre à jour la navigation entre les pages
+    function updatePagination() {
+      const nav = document.getElementById("page-nav");
+      nav.innerHTML = "";
+      const totalPages = Math.ceil(allRepos.length / projectsPerPage);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const pageLink = document.createElement("a");
+        pageLink.href = "javascript:void(0)";
+        pageLink.textContent = `Page ${i}`;
+        pageLink.onclick = () => {
+          currentPage = i;
+          displayPage(i);
+        };
+        nav.appendChild(pageLink);
+      }
+    }
+
+    // Charger les projets dès le début
+    loadRepos();
+  </script>
+
+</body>
+</html>
