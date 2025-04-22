@@ -23,9 +23,15 @@
       color: #58a6ff;
     }
 
+    #counter {
+      font-size: 1.1rem;
+      color: #8b949e;
+      margin-top: 0.5rem;
+    }
+
     #projects {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 1.5rem;
     }
 
@@ -51,28 +57,40 @@
 
     .repo p {
       font-size: 0.95rem;
-      margin: 0.5rem 0 1rem;
+      margin: 0.5rem 0;
     }
 
-    .repo a {
+    .repo a,
+    .repo button {
       text-decoration: none;
       background: #238636;
       color: #fff;
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.8rem;
       border-radius: 8px;
       text-align: center;
       font-weight: bold;
       transition: background 0.3s;
+      border: none;
+      cursor: pointer;
     }
 
-    .repo a:hover {
+    .repo a:hover,
+    .repo button:hover {
       background: #2ea043;
+    }
+
+    iframe {
+      width: 100%;
+      height: 200px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 0.5rem;
     }
 
     .note {
       font-size: 0.8rem;
       color: #8b949e;
-      margin-top: 0.5rem;
+      margin-top: 0.4rem;
     }
 
     .easter-egg {
@@ -86,7 +104,8 @@
 <body>
   <header>
     <h1>👨‍💻 Drissou13 - Portfolio</h1>
-    <p>Mes projets GitHub avec accès aux démos</p>
+    <p>Mes projets GitHub avec aperçu & démo</p>
+    <p id="counter">Chargement des projets...</p>
   </header>
 
   <section id="projects">Chargement...</section>
@@ -106,11 +125,16 @@
       const res = await fetch("https://api.github.com/users/drissou13/repos");
       const repos = await res.json();
       const container = document.getElementById("projects");
+      const counter = document.getElementById("counter");
+
       container.innerHTML = "";
+      let demoCount = 0;
 
       for (let repo of repos) {
         const demoUrl = `https://drissou13.github.io/${repo.name}`;
         const hasDemo = await checkDemo(demoUrl);
+
+        if (hasDemo) demoCount++;
 
         const div = document.createElement("div");
         div.className = "repo";
@@ -119,14 +143,21 @@
           <h3>${repo.name}</h3>
           <p>${repo.description || "Aucune description disponible."}</p>
           ${hasDemo
-            ? `<a href="${demoUrl}" target="_blank">Ouvrir la démo 🚀</a>
-               <p class="note">Démo GitHub Pages disponible</p>`
-            : `<a href="${repo.html_url}" target="_blank">Voir sur GitHub 📂</a>
-               <p class="note">Pas de démo détectée</p>`}
+            ? `
+              <iframe src="${demoUrl}"></iframe>
+              <button onclick="window.open('${demoUrl}', '_blank')">Ouvrir dans une nouvelle fenêtre 🚀</button>
+              <p class="note">Démo GitHub Pages active</p>
+            `
+            : `
+              <a href="${repo.html_url}" target="_blank">Voir le code 📂</a>
+              <p class="note">Pas de démo détectée</p>
+            `}
         `;
 
         container.appendChild(div);
       }
+
+      counter.textContent = `🧮 ${demoCount} projet${demoCount > 1 ? "s" : ""} avec démo en ligne`;
     }
 
     function setEasterEgg() {
@@ -134,17 +165,11 @@
       const month = now.getMonth() + 1;
       const egg = document.getElementById("easter");
 
-      if (month === 12) {
-        egg.textContent = "❄️";
-      } else if (month === 10) {
-        egg.textContent = "🎃";
-      } else if (month >= 3 && month <= 5) {
-        egg.textContent = "🌸";
-      } else if (month === 7 || month === 8) {
-        egg.textContent = "🌞";
-      } else {
-        egg.textContent = "";
-      }
+      if (month === 12) egg.textContent = "❄️";
+      else if (month === 10) egg.textContent = "🎃";
+      else if (month >= 3 && month <= 5) egg.textContent = "🌸";
+      else if (month === 7 || month === 8) egg.textContent = "🌞";
+      else egg.textContent = "";
     }
 
     setEasterEgg();
