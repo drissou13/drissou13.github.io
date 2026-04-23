@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERMINAL - Driss System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    
+    <div class="terminal" id="terminal">
+        <div id="boot-sequence"></div>
+
+        <div id="main-content" class="hidden">
+            <div class="header-info selectable">
+                Microsoft Windows [Version 10.0.19045.3803]<br>
+                (c) Driss Corporation. Tous droits réservés.
+            </div>
+            <br>
+            <div class="command-line">
+                <span class="prompt">C:\Users\Driss></span><span id="auto-type"></span>
+            </div>
+
+            <div id="repo-results" class="selectable"></div>
+
+            <div id="system-hints" class="hint-text"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
